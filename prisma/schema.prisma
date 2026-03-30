@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+model User {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId    String?  @unique
+  email      String   @unique
+  name       String?
+  role       Role     @default(SUBSCRIBER)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  subscription Subscription?
+  scores       Score[]
+  charity      Charity?      @relation("UserCharity", fields: [charityId], references: [id])
+  charityId    String?       @db.Uuid
+  charityPct   Float         @default(10)
+  drawEntries  DrawEntry[]
+  winnings     WinnerRecord[]
+}
+
+enum Role {
+  SUBSCRIBER
+  ADMIN
+}
+
+// ─── Subscriptions ────────────────────────────────────────────────────────────
+model Subscription {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String             @unique @db.Uuid
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 Plan
+  status               SubscriptionStatus @default(PENDING)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+enum Plan {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PENDING
+}
+
+// ─── Charities ────────────────────────────────────────────────────────────────
+model Charity {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  description String
+  imageUrl    String?
+  website     String?
+  featured    Boolean @default(false)
+
+  subscribers User[] @relation("UserCharity")
+}
+
+// ─── Scores ───────────────────────────────────────────────────────────────────
+model Score {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value      Int      // Stableford 1-45
+  datePlayed DateTime @db.Date
+  createdAt  DateTime @default(now())
+}
+
+// ─── Draws ────────────────────────────────────────────────────────────────────
+model Draw {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  month       Int        // 1-12
+  year        Int
+  drawType    DrawType
+  numbers     Int[]      // winning numbers
+  status      DrawStatus @default(SIMULATION)
+  prizePool   Float      @default(0)
+  jackpot     Float      @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+
+  entries  DrawEntry[]
+  winners  WinnerRecord[]
+}
+
+enum DrawType {
+  RANDOM
+  ALGORITHMIC
+}
+
+enum DrawStatus {
+  SIMULATION
+  PUBLISHED
+}
+
+// ─── Draw Entries ─────────────────────────────────────────────────────────────
+model DrawEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawId    String   @db.Uuid
+  draw      Draw     @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  numbers   Int[]    // user's entered numbers
+  createdAt DateTime @default(now())
+}
+
+// ─── Winner Records ───────────────────────────────────────────────────────────
+model WinnerRecord {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawId      String        @db.Uuid
+  draw        Draw          @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  userId      String        @db.Uuid
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchType   MatchType
+  prizeAmount Float
+  proofUrl    String?
+  status      WinnerStatus  @default(PENDING)
+  createdAt   DateTime      @default(now())
+}
+
+enum MatchType {
+  THREE_NUMBER
+  FOUR_NUMBER
+  FIVE_NUMBER
+}
+
+enum WinnerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
