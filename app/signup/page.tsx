@@ -51,7 +51,9 @@ function SignupForm() {
 
     if (authData.user) {
       toast.success('Account created successfully!')
-      router.push('/dashboard')
+      // Use window.location.href for a full page reload to ensure 
+      // Supabase session is fully propagated to the dashboard
+      window.location.href = '/dashboard'
     }
   }
 

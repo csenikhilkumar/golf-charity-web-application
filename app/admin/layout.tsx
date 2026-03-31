@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setStatus('authorized')
     } else {
       setStatus('denied')
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
     }
   }, [router])
 

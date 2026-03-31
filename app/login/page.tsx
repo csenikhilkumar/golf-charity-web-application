@@ -37,8 +37,9 @@ export default function LoginPage() {
       setLoading(false)
     } else {
       toast.success('Logged in successfully!')
-      router.push('/dashboard')
-      router.refresh()
+      // Use window.location.href for a full page reload to ensure 
+      // Supabase session is fully propagated to the dashboard
+      window.location.href = '/dashboard'
     }
   }
 

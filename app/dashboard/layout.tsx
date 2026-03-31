@@ -20,9 +20,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [user, router])
 
   useEffect(() => {
+    // If we're done loading and there's no user, redirect to login
     if (!loading && !user) {
-      router.push('/login')
+      router.replace('/login')
     } else if (!loading && user) {
+      // If there's a user, check for admin role and redirect to admin if needed
       checkAndRedirect()
     }
   }, [user, loading, router, checkAndRedirect])
