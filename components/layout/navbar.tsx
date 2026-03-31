@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/providers/auth-provider'
 import { useDashboard } from '@/components/providers/dashboard-provider'
 import { UserNav } from './user-nav'
+import { ThemeToggle } from './theme-toggle'
 
 const navLinks = [
   { name: 'How It Works', href: '/#how-it-works' },
@@ -104,7 +105,8 @@ export function Navbar() {
           </nav>
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             {session ? (
               <div className="flex items-center gap-3">
                 <UserNav />
@@ -128,7 +130,8 @@ export function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-foreground p-2 focus:outline-none focus:ring-2 focus:ring-primary rounded-md transition-colors hover:bg-muted"
