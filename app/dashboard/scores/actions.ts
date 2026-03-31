@@ -13,6 +13,9 @@ export async function submitScore(userId: string, value: number, datePlayed: str
     if (isNaN(date.getTime())) {
       return { error: 'Invalid date format.' }
     }
+    if (date > new Date()) {
+      return { error: 'You cannot log a score for a future date.' }
+    }
     
     // "Rolling 5" auto-replace backend logic:
     // User can only have a maximum of 5 most recent scores mapped to them for draw calculation.

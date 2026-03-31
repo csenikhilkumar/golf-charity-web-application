@@ -7,6 +7,10 @@ import { revalidatePath } from 'next/cache'
 
 export async function broadcastUpdate(title: string, content: string) {
   try {
+    // 0. Validation
+    if (!title.trim() || title.length < 5) return { success: false, error: 'Title must be at least 5 characters.' }
+    if (!content.trim() || content.length < 10) return { success: false, error: 'Content must be at least 10 characters.' }
+
     // 1. Fetch all subscribers
     const subscribers = await prisma.user.findMany({
       where: {

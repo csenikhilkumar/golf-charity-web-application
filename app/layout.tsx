@@ -15,8 +15,11 @@ const fontHeading = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: 'Golf Charity Subscription Platform',
+  title: 'Golf Charity | Impact through Play',
   description: 'Make an impact while playing the game you love.',
+  icons: {
+    icon: '/favicon.png',
+  },
 }
 
 import { Navbar } from '@/components/layout/navbar'

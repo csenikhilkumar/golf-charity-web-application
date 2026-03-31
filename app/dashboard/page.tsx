@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { Trophy, Target, Heart, ArrowRight, User as UserIcon, Calendar, Activity } from 'lucide-react'
+import { Trophy, Target, Heart, ArrowRight, User as UserIcon, Calendar, Activity, AlertTriangle, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 
 export default function DashboardPage() {
@@ -27,15 +27,45 @@ export default function DashboardPage() {
     )
   }
 
-  if (!data) {
+  if (data?.error) {
     return (
-      <div className="text-center py-20 flex flex-col items-center">
-        <UserIcon className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-        <h2 className="text-xl font-bold font-heading mb-2">Profile Not Found</h2>
-        <p className="text-muted-foreground mb-6">We couldn't load your dashboard data. Have you completed signup?</p>
-        <Link href="/subscribe" className={buttonVariants()}>
-          Complete Setup
-        </Link>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-500">
+        <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-6">
+          <AlertTriangle className="h-8 w-8 text-destructive" />
+        </div>
+        <h2 className="text-2xl font-bold font-heading mb-2">Something went wrong</h2>
+        <p className="text-muted-foreground max-w-md mb-8">
+          {data.error}
+        </p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="rounded-xl h-12 px-8 flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
+  if (!data || !data.user) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-500">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+          <UserIcon className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-2xl font-bold font-heading mb-2">Profile Not Found</h2>
+        <p className="text-muted-foreground max-w-md mb-8">
+          We couldn't load your dashboard data. If you just signed up, please try refreshing the page.
+        </p>
+        <div className="flex gap-4">
+          <Link href="/subscribe" className={cn(buttonVariants({ size: "lg" }), "rounded-xl px-8 h-12 flex items-center justify-center")}>
+            Complete Setup
+          </Link>
+          <Button variant="outline" onClick={() => window.location.reload()} className="rounded-xl px-8 h-12">
+            Refresh Page
+          </Button>
+        </div>
       </div>
     )
   }
