@@ -4,6 +4,11 @@
  * - In local development, it defaults to localhost:3000.
  */
 export const getURL = () => {
+  // On the client side, window.location.origin is the most reliable source of truth.
+  if (typeof window !== 'undefined' && window.location.origin) {
+    return window.location.origin;
+  }
+
   let url =
     process?.env?.NEXT_PUBLIC_APP_URL ??
     process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
