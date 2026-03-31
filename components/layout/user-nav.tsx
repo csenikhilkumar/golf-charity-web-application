@@ -75,7 +75,7 @@ export function UserNav() {
             {displayName}
           </span>
           <span className="text-[10px] font-medium text-primary uppercase tracking-wider">
-            {dbUser?.role === 'ADMIN' ? 'Admin' : 'Premium'}
+            {dbUser?.role === 'ADMIN' ? 'Admin' : (dbUser?.subscription?.status === 'ACTIVE' ? 'Premium' : 'Member')}
           </span>
         </div>
         <ChevronDown 

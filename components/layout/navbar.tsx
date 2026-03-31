@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LogOut, LayoutDashboard, Heart } from 'lucide-react'
+import { Menu, X, LogOut, LayoutDashboard, Heart, ShieldCheck } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -11,6 +11,7 @@ import { useAuth } from '@/components/providers/auth-provider'
 import { useDashboard } from '@/components/providers/dashboard-provider'
 import { UserNav } from './user-nav'
 import { ThemeToggle } from './theme-toggle'
+import { NotificationBell } from './notification-bell'
 
 const navLinks = [
   { name: 'How It Works', href: '/#how-it-works' },
@@ -48,9 +49,10 @@ export function Navbar() {
   const isAppRoute = pathname?.startsWith('/dashboard') || pathname === '/subscribe'
   const isAdminRoute = pathname?.startsWith('/admin')
   const isCharityFlow = pathname?.startsWith('/charities')
+  const isWinnersPage = pathname === '/winners'
   
-  // Desktop hides links on dashboard/admin because they have a sidebar
-  const desktopLinks = (isAdminRoute || isCharityFlow || isAppRoute) ? [] : navLinks
+  // Desktop hides links on dashboard/admin/winners because they are secondary focus
+  const desktopLinks = (isAdminRoute || isCharityFlow || isAppRoute || isWinnersPage) ? [] : navLinks
   
   // Mobile needs the dashboard/admin links since the sidebar is hidden
   const mobileLinks = isAppRoute ? dashboardLinks : isAdminRoute ? adminLinks : desktopLinks
@@ -106,9 +108,30 @@ export function Navbar() {
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-3">
+            <NotificationBell />
             <ThemeToggle />
             {session ? (
               <div className="flex items-center gap-3">
+                {dbUser?.role === 'ADMIN' ? (
+                  !isAdminRoute && (
+                    <Link 
+                      href="/admin" 
+                      className={cn(buttonVariants({ variant: "outline" }), "rounded-full transition-all border-primary/20 hover:bg-primary/5 text-primary font-bold")}
+                    >
+                      Admin Console
+                    </Link>
+                  )
+                ) : (
+                  !isAppRoute && (
+                    <Link 
+                      href="/dashboard" 
+                      className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300")}
+                    >
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  )
+                )}
                 <UserNav />
               </div>
             ) : (
@@ -131,6 +154,7 @@ export function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center gap-2">
+            <NotificationBell />
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -179,10 +203,33 @@ export function Navbar() {
                   <div>
                     <p className="text-sm font-bold text-foreground">{displayName}</p>
                     <p className="text-[10px] font-medium text-primary uppercase tracking-wider mt-0.5">
-                      {dbUser?.role === 'ADMIN' ? 'Admin' : 'Premium'}
+                      {dbUser?.role === 'ADMIN' ? 'Admin' : (dbUser?.subscription?.status === 'ACTIVE' ? 'Premium' : 'Member')}
                     </p>
                   </div>
                 </div>
+                {dbUser?.role === 'ADMIN' ? (
+                  !isAdminRoute && (
+                    <Link 
+                      href="/admin" 
+                      className={cn(buttonVariants({ variant: "outline" }), "w-full justify-center rounded-xl h-12 text-base border-primary/20 text-primary font-bold")}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Admin Console
+                    </Link>
+                  )
+                ) : (
+                  !isAppRoute && (
+                    <Link 
+                      href="/dashboard" 
+                      className={cn(buttonVariants({ variant: "default" }), "w-full justify-center rounded-xl h-12 text-base shadow-lg shadow-primary/20")}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Go to Dashboard
+                    </Link>
+                  )
+                )}
                 <button 
                   onClick={() => {
                     handleSignOut()

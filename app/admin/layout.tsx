@@ -22,6 +22,7 @@ const adminNavItems = [
   { name: 'Charities', href: '/admin/charities', icon: Heart },
   { name: 'Draws', href: '/admin/draws', icon: Trophy },
   { name: 'Winners', href: '/admin/winners', icon: Trophy },
+  { name: 'Updates', href: '/admin/system-updates', icon: LayoutDashboard },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -41,8 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router])
 
   useEffect(() => {
-    if (pathname === '/admin/login') return
-    if (authLoading) return
+    if (pathname === '/admin/login' || authLoading || status === 'authorized') return
 
     if (!user) {
       router.push('/admin/login')
@@ -50,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     verifyAdmin(user.id)
-  }, [user, authLoading, verifyAdmin, pathname])
+  }, [user?.id, authLoading, verifyAdmin, pathname])
 
   // Skip auth guard for the login page itself to avoid infinite redirect loop
   if (pathname === '/admin/login') {

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { useAuth } from './auth-provider'
 import { getDashboardData, syncStripeSession } from '@/app/dashboard/actions'
 
@@ -61,8 +61,10 @@ export const DashboardProvider = ({ children }: { children: React.ReactNode }) =
     }
   }, [user, authLoading])
 
+  const value = useMemo(() => ({ data, loading, refreshData: () => loadData(true) }), [data, loading, loadData])
+
   return (
-    <DashboardContext.Provider value={{ data, loading, refreshData: () => loadData(true) }}>
+    <DashboardContext.Provider value={value}>
       {children}
     </DashboardContext.Provider>
   )
