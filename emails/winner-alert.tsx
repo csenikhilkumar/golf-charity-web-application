@@ -12,6 +12,7 @@ import {
   Img,
 } from '@react-email/components';
 import * as React from 'react';
+import { getURL } from '../lib/get-url';
 
 interface WinnerAlertEmailProps {
   userName: string;
@@ -48,7 +49,7 @@ export const WinnerAlertEmail = ({
             To claim your prize, please log in to your dashboard and upload your proof of participation (e.g., your Stableford score card).
           </Text>
           <Section style={btnContainer}>
-            <Link style={button} href={`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`}>
+            <Link style={button} href={`${getURL()}/dashboard`}>
               Go to Dashboard
             </Link>
           </Section>
