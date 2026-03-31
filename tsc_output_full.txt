@@ -1,0 +1,9 @@
+app/api/checkout/route.ts(5,3): error TS2322: Type '"2025-02-24.acacia"' is not assignable to type '"2026-03-25.dahlia"'.
+app/api/webhooks/stripe/route.ts(68,55): error TS2339: Property 'current_period_start' does not exist on type 'Response<Subscription>'.
+app/api/webhooks/stripe/route.ts(69,53): error TS2339: Property 'current_period_end' does not exist on type 'Response<Subscription>'.
+app/api/webhooks/stripe/route.ts(76,55): error TS2339: Property 'current_period_start' does not exist on type 'Response<Subscription>'.
+app/api/webhooks/stripe/route.ts(77,53): error TS2339: Property 'current_period_end' does not exist on type 'Response<Subscription>'.
+app/api/webhooks/stripe/route.ts(85,19): error TS2339: Property 'subscription' does not exist on type 'Invoice'.
+app/api/webhooks/stripe/route.ts(86,74): error TS2339: Property 'subscription' does not exist on type 'Invoice'.
+app/api/webhooks/stripe/route.ts(91,55): error TS2339: Property 'current_period_start' does not exist on type 'Response<Subscription>'.
+app/api/webhooks/stripe/route.ts(92,53): error TS2339: Property 'current_period_end' does not exist on type 'Response<Subscription>'.

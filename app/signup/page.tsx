@@ -53,7 +53,7 @@ export default function SignupPage() {
     // If email confirmations are off, authData.user will be active.
     if (authData.user) {
       // NOTE: Our Prisma User model will need to be synced. Typically you'd call an internal API here.
-      router.push('/login?message=Account created! Please log in.')
+      router.push('/subscribe')
     }
   }
 
