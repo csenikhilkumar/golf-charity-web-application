@@ -24,6 +24,14 @@ const dashboardLinks = [
   { name: 'Winnings', href: '/dashboard/winnings' },
 ]
 
+const adminLinks = [
+  { name: 'Overview', href: '/admin' },
+  { name: 'Users', href: '/admin/users' },
+  { name: 'Charities', href: '/admin/charities' },
+  { name: 'Draws', href: '/admin/draws' },
+  { name: 'Winners', href: '/admin/winners' },
+]
+
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -40,8 +48,11 @@ export function Navbar() {
   const isAdminRoute = pathname?.startsWith('/admin')
   const isCharityFlow = pathname?.startsWith('/charities')
   
-  // Admin and app routes show no top navigation links on desktop (they are in sidebar)
-  const currentLinks = (isAdminRoute || isCharityFlow || isAppRoute) ? [] : navLinks
+  // Desktop hides links on dashboard/admin because they have a sidebar
+  const desktopLinks = (isAdminRoute || isCharityFlow || isAppRoute) ? [] : navLinks
+  
+  // Mobile needs the dashboard/admin links since the sidebar is hidden
+  const mobileLinks = isAppRoute ? dashboardLinks : isAdminRoute ? adminLinks : desktopLinks
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,7 +92,7 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {currentLinks.map((link) => (
+            {desktopLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -140,7 +151,7 @@ export function Navbar() {
       >
         <div className="px-4 py-6 space-y-4">
           <nav className="flex flex-col gap-2">
-            {currentLinks.map((link) => (
+            {mobileLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}

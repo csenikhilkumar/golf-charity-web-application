@@ -22,6 +22,8 @@ export const metadata: Metadata = {
 import { Navbar } from '@/components/layout/navbar'
 import { Toaster } from 'sonner'
 
+import Script from 'next/script'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,6 +31,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full scroll-smooth">
+      <head>
+        <Script id="auth-redirect" strategy="beforeInteractive" dangerouslySetInnerHTML={{
+          __html: `
+            if (window.location.pathname === '/') {
+              try {
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+                    const token = localStorage.getItem(key);
+                    if (token && JSON.parse(token).access_token) {
+                      window.location.replace('/dashboard');
+                    }
+                  }
+                }
+              } catch (e) {}
+            }
+          `
+        }} />
+      </head>
       <body className={`${fontSans.variable} ${fontHeading.variable} min-h-full font-sans antialiased bg-background text-foreground flex flex-col`}>
         <AuthProvider>
           <DashboardProvider>

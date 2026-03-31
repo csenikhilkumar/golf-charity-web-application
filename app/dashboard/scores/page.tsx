@@ -98,13 +98,13 @@ export default function ScoresPage() {
                 </div>
               ) : (
                 <div className="space-y-4 pt-2">
-                  {scores.map((score, idx) => (
+                  {scores.map((score: any, idx: number) => (
                     <div 
                       key={score.id}
-                      className="flex items-center justify-between p-5 rounded-2xl border border-border bg-card/50 hover:bg-muted/50 transition-colors"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 gap-4 rounded-2xl border border-border bg-card/50 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg font-heading">
+                        <div className="h-12 w-12 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg font-heading">
                           #{idx + 1}
                         </div>
                         <div>
