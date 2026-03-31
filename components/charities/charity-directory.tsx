@@ -10,6 +10,11 @@ import { cn } from '@/lib/utils'
 
 export function CharityDirectory({ initialCharities }: { initialCharities: Charity[] }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({})
+
+  const handleImageError = (id: string) => {
+    setBrokenImages(prev => ({ ...prev, [id]: true }))
+  }
 
   const filteredCharities = initialCharities.filter((charity) => 
     charity.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -18,6 +23,16 @@ export function CharityDirectory({ initialCharities }: { initialCharities: Chari
 
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 md:py-24 animate-in fade-in duration-700">
+      <div className="mb-12 md:hidden">
+        <Link 
+          href="/dashboard"
+          className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors font-medium"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Back to Dashboard
+        </Link>
+      </div>
+
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-heading mb-6 text-foreground tracking-tight">
           Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-500">Charity Partners</span>
@@ -27,14 +42,14 @@ export function CharityDirectory({ initialCharities }: { initialCharities: Chari
         </p>
 
         {/* Search Input */}
-        <div className="relative max-w-xl mx-auto shadow-sm group">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <div className="relative max-w-xl mx-auto group">
+          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           </div>
           <Input 
             type="text" 
             placeholder="Search by name or cause..." 
-            className="pl-12 h-14 text-lg rounded-full border-2 focus-visible:ring-0 focus-visible:border-primary transition-all bg-background"
+            className="pl-13 h-14 text-lg rounded-full border-border/60 border focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10 transition-all bg-background shadow-sm hover:shadow-md hover:border-border"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -46,22 +61,21 @@ export function CharityDirectory({ initialCharities }: { initialCharities: Chari
         {filteredCharities.map((charity) => (
           <div key={charity.id} className="group bg-card rounded-3xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full hover:-translate-y-1">
             <div className="h-56 relative overflow-hidden bg-muted">
-              {charity.imageUrl ? (
+              {charity.imageUrl && !brokenImages[charity.id] ? (
                 <img 
                   src={charity.name === 'The First Tee' ? 'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=800&auto=format&fit=crop' : charity.imageUrl} 
                   alt={charity.name}
+                  onError={() => handleImageError(charity.id)}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/30">
                   <Heart className="h-12 w-12 text-muted-foreground/30" />
                 </div>
               )}
-              {charity.featured && (
-                <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-primary border border-primary/20 shadow-sm">
-                  Featured
-                </div>
-              )}
+              <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/20 shadow-sm z-10">
+                Featured
+              </div>
             </div>
             
             <div className="p-6 flex-1 flex flex-col">

@@ -49,16 +49,20 @@ export default function SignupPage() {
     // In many Supabase setups, a DB trigger automatically creates the User record in public.User
     // BUT since we are using Prisma, we'll let Prisma handle the mapping, or we manually create it here
     
-    // For now, let's redirect to login with a success message
+    // For now, let's redirect to dashboard
     // If email confirmations are off, authData.user will be active.
     if (authData.user) {
-      // NOTE: Our Prisma User model will need to be synced. Typically you'd call an internal API here.
-      router.push('/subscribe')
+      router.push('/dashboard')
     }
   }
 
   const handleGoogleAuth = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    })
     if (error) setError(error.message)
   }
 
