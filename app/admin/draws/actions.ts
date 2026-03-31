@@ -10,13 +10,23 @@ import { revalidatePath } from 'next/cache'
  */
 export async function simulateDraw(month: number, year: number, type: 'RANDOM' | 'ALGORITHMIC' = 'RANDOM') {
   try {
+    // 1. Validation
+    if (month < 1 || month > 12) return { success: false, error: 'Invalid month' }
+    if (year < 2024 || year > 2030) return { success: false, error: 'Invalid year' }
+
+    // 2. Prevent duplicate published draws
+    const existingDraw = await prisma.draw.findFirst({
+      where: { month, year, status: 'PUBLISHED' }
+    })
+    if (existingDraw) {
+      return { success: false, error: `A draw for ${month}/${year} has already been published.` }
+    }
+
     const prizePool = await DrawEngine.calculatePrizePool(month, year)
     const winningNumbers = type === 'RANDOM' 
       ? DrawEngine.generateNumbers() 
       : await DrawEngine.runAlgorithmicSimulation(month, year)
 
-    // We need a temporary draw ID to fetch entries (or just pass the criteria)
-    // For simulation, we create a draft draw or handle it in memory
     const tempDraw = await prisma.draw.create({
       data: {
         month,
@@ -38,7 +48,7 @@ export async function simulateDraw(month: number, year: number, type: 'RANDOM' |
     }
   } catch (error) {
     console.error('Error simulating draw:', error)
-    return { success: false, error: 'Simulation failed' }
+    return { success: false, error: error instanceof Error ? error.message : 'Simulation failed' }
   }
 }
 
@@ -56,6 +66,7 @@ export async function publishDraw(drawId: string, winners: any[]) {
       include: { entries: true }
     })
     if (!draw) throw new Error('Draw not found')
+    if (draw.status === 'PUBLISHED') throw new Error('This draw has already been published.')
 
     // 1. Update draw status
     await prisma.draw.update({
@@ -72,6 +83,7 @@ export async function publishDraw(drawId: string, winners: any[]) {
     const drawMonth = monthNames[draw.month - 1];
 
     // 2. Create winner records and send individual alerts
+    // Using a for loop is fine for handling individual emails/notifications
     for (const winner of winners) {
       await prisma.winnerRecord.create({
         data: {
@@ -97,6 +109,7 @@ export async function publishDraw(drawId: string, winners: any[]) {
           })
         })
       }
+      
       // Create In-App Notification for winner
       await prisma.notification.create({
         data: {
@@ -148,11 +161,12 @@ export async function publishDraw(drawId: string, winners: any[]) {
     revalidatePath('/')
     revalidatePath('/admin/draws')
     revalidatePath('/winners')
+    revalidatePath('/dashboard')
     
     return { success: true }
   } catch (error) {
     console.error('Error publishing draw:', error)
-    return { success: false, error: 'Publishing failed' }
+    return { success: false, error: error instanceof Error ? error.message : 'Publishing failed' }
   }
 }
 

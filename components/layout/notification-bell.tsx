@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useTransition } from 'react'
-import { Bell, Trophy, Target, Megaphone, Check, Trash, ArrowRight, Loader2 } from 'lucide-react'
+import { Bell, Trophy, Target, Megaphone, Check, Trash, ArrowRight, Loader2, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/components/providers/auth-provider'
 import { getNotifications, markAsRead, markAllAsRead } from '@/app/dashboard/notifications/actions'
 import { cn } from '@/lib/utils'
@@ -11,6 +11,7 @@ export function NotificationBell() {
   const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -18,8 +19,14 @@ export function NotificationBell() {
 
   const fetchNotifications = async () => {
     if (!user) return
-    const res = await getNotifications(user.id)
-    setNotifications(res.notifications)
+    setError(null)
+    try {
+      const res = await getNotifications(user.id)
+      setNotifications(res.notifications)
+    } catch (err) {
+      console.error('Error fetching notifications:', err)
+      setError('Failed to load notifications')
+    }
   }
 
   useEffect(() => {
@@ -108,7 +115,18 @@ export function NotificationBell() {
           </div>
 
           <div className="max-h-[350px] overflow-y-auto divide-y divide-border">
-            {notifications.length > 0 ? (
+            {error ? (
+              <div className="p-8 text-center">
+                <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">{error}</p>
+                <button 
+                  onClick={() => fetchNotifications()} 
+                  className="mt-2 text-[10px] font-bold text-primary hover:underline hover:opacity-80"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : notifications.length > 0 ? (
               notifications.map((n) => (
                 <div 
                   key={n.id} 

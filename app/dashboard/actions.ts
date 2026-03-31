@@ -54,7 +54,7 @@ export async function getDashboardData(userId: string, email?: string, name?: st
       })
     }
 
-    if (!user) return { error: 'User not found in database' }
+    if (!user) return { error: 'User not found' }
 
     const [totalWonAgg, latestDraw] = await Promise.all([
       prisma.winnerRecord.aggregate({
@@ -76,19 +76,17 @@ export async function getDashboardData(userId: string, email?: string, name?: st
       })
     ])
 
-    const totalWon = totalWonAgg._sum.prizeAmount || 0
-
     return { 
       user, 
       stats: {
-        totalWon,
-        participationCount: user._count.drawEntries,
-        latestDraw
+        totalWon: totalWonAgg._sum.prizeAmount || 0,
+        participationCount: user._count?.drawEntries || 0,
+        latestDraw: latestDraw || null
       }
     }
   } catch (error: any) {
-    console.error('Error fetching dashboard data:', error)
-    return { error: 'Failed to retrieve data' }
+    console.error('[getDashboardData] Error:', error)
+    return { error: 'Failed to retrieve dashboard data. Please try again later.' }
   }
 }
 
