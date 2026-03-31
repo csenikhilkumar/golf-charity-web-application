@@ -7,9 +7,12 @@ import { supabase } from '@/lib/supabase'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { Target } from 'lucide-react'
+import { Target, Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 
-export default function SignupPage() {
+import { Suspense } from 'react'
+
+function SignupForm() {
   const router = useRouter()
   // App router useSearchParams to get optional selected charity
   const searchParams = useSearchParams()
@@ -21,13 +24,13 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    // 1. Sign up on Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -45,22 +48,18 @@ export default function SignupPage() {
       return
     }
 
-    // 2. We redirect to dashboard or a "complete profile" flow
-    // In many Supabase setups, a DB trigger automatically creates the User record in public.User
-    // BUT since we are using Prisma, we'll let Prisma handle the mapping, or we manually create it here
-    
-    // For now, let's redirect to dashboard
-    // If email confirmations are off, authData.user will be active.
     if (authData.user) {
+      toast.success('Account created successfully!')
       router.push('/dashboard')
     }
   }
 
   const handleGoogleAuth = async () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const { error } = await supabase.auth.signInWithOAuth({ 
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: `${origin}/dashboard`
       }
     })
     if (error) setError(error.message)
@@ -166,15 +165,24 @@ export default function SignupPage() {
             <label className="text-sm font-semibold text-foreground" htmlFor="password">
               Password
             </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="h-12 rounded-xl bg-muted/50"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="h-12 rounded-xl bg-muted/50 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -194,5 +202,27 @@ export default function SignupPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-background rounded-3xl p-8 border border-border shadow-2xl animate-pulse">
+          <div className="h-8 w-8 bg-muted rounded-full mx-auto mb-6" />
+          <div className="h-8 w-48 bg-muted rounded mx-auto mb-2" />
+          <div className="h-4 w-64 bg-muted rounded mx-auto mb-8" />
+          <div className="h-12 w-full bg-muted rounded-xl mb-6" />
+          <div className="space-y-4">
+            <div className="h-12 w-full bg-muted rounded-xl" />
+            <div className="h-12 w-full bg-muted rounded-xl" />
+            <div className="h-12 w-full bg-muted rounded-xl" />
+          </div>
+        </div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   )
 }

@@ -72,7 +72,7 @@ export default function WinningsPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
-          {winnings.map((win) => {
+          {winnings.map((win: any) => {
             const isPendingProof = win.status === 'PENDING' && !win.proofUrl
             const isAwaitingApproval = win.status === 'PENDING' && win.proofUrl
             
