@@ -22,6 +22,7 @@ const adminNavItems = [
   { name: 'Charities', href: '/admin/charities', icon: Heart },
   { name: 'Draws', href: '/admin/draws', icon: Trophy },
   { name: 'Winners', href: '/admin/winners', icon: Trophy },
+  { name: 'Updates', href: '/admin/system-updates', icon: LayoutDashboard },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -41,8 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [router])
 
   useEffect(() => {
-    if (pathname === '/admin/login') return
-    if (authLoading) return
+    if (pathname === '/admin/login' || authLoading || status === 'authorized') return
 
     if (!user) {
       router.push('/admin/login')
@@ -50,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     verifyAdmin(user.id)
-  }, [user, authLoading, verifyAdmin, pathname])
+  }, [user?.id, authLoading, verifyAdmin, pathname])
 
   // Skip auth guard for the login page itself to avoid infinite redirect loop
   if (pathname === '/admin/login') {
@@ -81,59 +81,53 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex min-h-screen bg-muted/20">
-      {/* Admin Sidebar */}
-      <aside className="w-64 border-r border-border bg-background hidden lg:flex flex-col sticky top-0 h-screen">
-        <div className="p-6 border-b border-border flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-            <ShieldCheck className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="font-heading font-bold text-lg leading-none">Admin</h2>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest mt-1">Console</p>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1">
-          {adminNavItems.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/10" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
+    <div className="container mx-auto px-4 md:px-8 py-8 animate-in fade-in duration-700">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        {/* Admin Sidebar */}
+        <aside className="w-64 hidden lg:flex flex-col sticky top-24 h-[calc(100vh-8rem)]">
+          <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl p-4 h-full shadow-sm flex flex-col">
+            <div className="mb-6 px-4 py-2">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-50">Admin Console</p>
+            </div>
+            <nav className="flex-1 space-y-1.5">
+              {adminNavItems.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all group",
+                      isActive 
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]" 
+                        : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className={cn("h-5 w-5", isActive ? "text-primary-foreground" : "group-hover:scale-110 transition-transform")} />
+                      <span>{item.name}</span>
+                    </div>
+                    {isActive && <ChevronRight className="h-4 w-4 opacity-50" />}
+                  </Link>
+                )
+              })}
+            </nav>
+            <div className="pt-6 mt-auto border-t border-border/50 px-2">
+              <Link 
+                href="/dashboard"
+                className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <item.icon className={cn("h-5 w-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
-                  <span className="font-medium">{item.name}</span>
-                </div>
-                {isActive && <ChevronRight className="h-4 w-4" />}
+                ← Back to App
               </Link>
-            )
-          })}
-        </nav>
+            </div>
+          </div>
+        </aside>
 
-        <div className="p-6 mt-auto border-t border-border">
-          <Link 
-            href="/dashboard"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            ← Back to App
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        {/* Main Content */}
+        <main className="flex-1 min-w-0 pb-12">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

@@ -102,7 +102,7 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Global Impact Summary */}
-        <Card className="rounded-3xl border-border shadow-sm border-l-4 border-l-primary">
+        <Card className="rounded-3xl border-border shadow-sm">
           <CardHeader>
             <CardTitle className="font-heading text-xl">Global Impact</CardTitle>
             <CardDescription>Estimated charitable contributions.</CardDescription>

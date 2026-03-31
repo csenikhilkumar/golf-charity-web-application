@@ -43,6 +43,7 @@ export default function DashboardPage() {
   const user = data.user
   const stats = data.stats
   const isSubscribed = user.subscription?.status === 'ACTIVE'
+  const pendingWin = user.winnings?.find((w: any) => w.status === 'PENDING')
   const scoresCount = user.scores?.length || 0
   const recentScore = scoresCount > 0 ? user.scores[0] : null
   const rollingAverage = scoresCount > 0 
@@ -51,6 +52,24 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-12">
+      {/* Winner Alert Banner */}
+      {pendingWin && (
+        <div className="bg-emerald-600 dark:bg-emerald-500 text-white rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl shadow-emerald-500/20 border border-emerald-400/30 animate-in zoom-in-95 duration-500">
+           <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
+                 <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                 <h2 className="text-xl font-black font-heading leading-tight">Congratulations! You've Won!</h2>
+                 <p className="text-emerald-50 opacity-90 text-sm font-medium">You have a pending prize claim of <strong className="text-white">${pendingWin.prizeAmount.toFixed(0)}</strong>.</p>
+              </div>
+           </div>
+           <Link href="/dashboard/winnings" className="px-6 py-3 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-colors shadow-sm">
+              Claim Your Prize
+           </Link>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="bg-primary/5 border border-primary/20 rounded-3xl p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -211,7 +230,7 @@ export default function DashboardPage() {
                      </div>
                      <div className="flex gap-2">
                         {stats.latestDraw.numbers.map((num: number) => (
-                          <div key={num} className="h-9 w-9 rounded-full bg-white border border-border flex items-center justify-center text-sm font-bold shadow-sm">
+                          <div key={num} className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-black shadow-lg shadow-primary/20 border-2 border-primary/20">
                             {num}
                           </div>
                         ))}
