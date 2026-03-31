@@ -36,6 +36,7 @@ function SignupForm() {
       email,
       password,
       options: {
+        emailRedirectTo: `${getURL()}/dashboard`,
         data: {
           full_name: name,
           phone_number: phone
