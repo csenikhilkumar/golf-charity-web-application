@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { getURL } from '@/lib/get-url'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -55,11 +56,10 @@ function SignupForm() {
   }
 
   const handleGoogleAuth = async () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const { error } = await supabase.auth.signInWithOAuth({ 
       provider: 'google',
       options: {
-        redirectTo: `${origin}/dashboard`
+        redirectTo: `${getURL()}/dashboard`
       }
     })
     if (error) setError(error.message)

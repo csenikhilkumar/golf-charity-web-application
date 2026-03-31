@@ -11,6 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { getURL } from '../lib/get-url';
 
 interface SystemUpdateEmailProps {
   title: string;
@@ -34,7 +35,7 @@ export const SystemUpdateEmail = ({
           <Text style={paragraph}>{content}</Text>
           
           <Section style={btnContainer}>
-            <Link style={button} href={`${process.env.NEXT_PUBLIC_APP_URL}/dashboard`}>
+            <Link style={button} href={`${getURL()}/dashboard`}>
               Open Dashboard
             </Link>
           </Section>

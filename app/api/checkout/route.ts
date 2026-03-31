@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { getURL } from '@/lib/get-url'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-03-25.dahlia',
@@ -45,8 +46,8 @@ export async function POST(req: Request) {
         charityId,
         charityContributionPercentage: percentage.toString(),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/subscribe`,
+      success_url: `${getURL()}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${getURL()}/subscribe`,
     })
 
     return NextResponse.json({ url: session.url })
