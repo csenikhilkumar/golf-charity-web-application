@@ -3,6 +3,7 @@ import { buttonVariants } from '@/components/ui/button-variants'
 import { cn } from '@/lib/utils'
 import { Trophy, Target, Heart, ArrowRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
+import { AuthRedirect } from '@/components/auth/AuthRedirect'
 
 export default async function Home() {
   const featuredCharities = await prisma.charity.findMany({
@@ -12,6 +13,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <AuthRedirect />
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 lg:pt-36 lg:pb-48 overflow-hidden">
         <div className="absolute inset-0 bg-background">
@@ -108,7 +110,7 @@ export default async function Home() {
       </section>
 
       {/* Featured Charities Section */}
-      <section className="py-24 bg-background">
+      <section id="charities" className="py-24 bg-background">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div className="max-w-xl">

@@ -4,11 +4,17 @@ import { ExternalLink, Heart, Globe, Target, MapPin } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { cn } from '@/lib/utils'
+import { SupportCharityButton } from '@/components/charities/SupportCharityButton'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const charity = await prisma.charity.findUnique({
-    where: { id }
+    where: { id },
+    include: {
+      _count: {
+        select: { subscribers: true }
+      }
+    }
   })
   if (!charity) return { title: 'Charity Not Found' }
   return {
@@ -20,7 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function CharityProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const charity = await prisma.charity.findUnique({
-    where: { id }
+    where: { id },
+    include: {
+      _count: {
+        select: { subscribers: true }
+      }
+    }
   })
 
   if (!charity) {
@@ -28,7 +39,17 @@ export default async function CharityProfilePage({ params }: { params: Promise<{
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pt-20">
+    <div className="min-h-screen bg-background flex flex-col pt-8">
+      <div className="container mx-auto px-4 md:px-8 mb-4 md:hidden">
+        <Link 
+          href="/charities"
+          className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors font-medium px-4 py-2 bg-muted/50 rounded-full border border-border/50"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Back to Directory
+        </Link>
+      </div>
+
       {/* Charity Hero Section */}
       <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
         {charity.imageUrl ? (
@@ -93,7 +114,7 @@ export default async function CharityProfilePage({ params }: { params: Promise<{
             <div className="bg-muted/50 rounded-3xl p-8 border border-border/50">
               <h3 className="text-xl font-bold font-heading text-foreground mb-2">Member Supporters</h3>
               <p className="text-3xl font-bold text-foreground">
-                0
+                {charity._count?.subscribers || 0}
               </p>
               <p className="text-sm text-muted-foreground mt-2">members have chosen this cause.</p>
             </div>
@@ -108,12 +129,10 @@ export default async function CharityProfilePage({ params }: { params: Promise<{
               When you subscribe to our platform and enter the monthly draws, you can dedicate 10% or more of your monthly fee directly to this incredible cause.
             </p>
             <div className="space-y-4">
-              <Link 
-                href={`/signup?charityId=${charity.id}`}
-                className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "w-full rounded-full h-14 font-bold text-lg hover:shadow-lg transition-all hover:scale-[1.02]")}
-              >
-                Select as My Charity
-              </Link>
+              <SupportCharityButton 
+                charityId={charity.id} 
+                charityName={charity.name} 
+              />
               <Link 
                 href="/charities"
                 className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "w-full rounded-full h-14 hover:bg-primary-foreground/10 text-primary-foreground")}

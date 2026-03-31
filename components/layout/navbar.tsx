@@ -2,28 +2,64 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Menu, X, LogOut, LayoutDashboard, Heart } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/components/providers/auth-provider'
+import { useDashboard } from '@/components/providers/dashboard-provider'
+import { UserNav } from './user-nav'
 
 const navLinks = [
   { name: 'How It Works', href: '/#how-it-works' },
-  { name: 'Charities', href: '/charities' },
+  { name: 'Charities', href: '/#charities' },
   { name: 'Impact', href: '/impact' },
   { name: 'Winners', href: '/winners' },
+]
+
+const dashboardLinks = [
+  { name: 'Overview', href: '/dashboard' },
+  { name: 'My Scores', href: '/dashboard/scores' },
+  { name: 'Winnings', href: '/dashboard/winnings' },
 ]
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { session } = useAuth()
+  const pathname = usePathname()
+  const { data } = useDashboard()
+  const dbUser = data?.user
+  
+  const initials = dbUser?.name ? dbUser.name.charAt(0).toUpperCase() : (session?.user?.email ? session.user.email.charAt(0).toUpperCase() : 'U')
+  const displayName = dbUser?.name || session?.user?.user_metadata?.name || session?.user?.email?.split('@')[0] || 'Member'
+  const imageUrl = dbUser?.imageUrl
+  
+  const isAppRoute = pathname?.startsWith('/dashboard') || pathname === '/subscribe'
+  const isCharityFlow = pathname?.startsWith('/charities')
+  
+  // If in charity flow, we show no navigation links (How it works, etc)
+  const currentLinks = isCharityFlow ? [] : (isAppRoute ? dashboardLinks : navLinks)
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
+  // No longer returning null, we show the header without links
+  // if (isCharityFlow) return null
 
   return (
     <header
@@ -44,7 +80,7 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {currentLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -56,19 +92,39 @@ export function Navbar() {
           </nav>
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link 
-              href="/login" 
-              className={cn(buttonVariants({ variant: "ghost" }), "hover:bg-primary/10 transition-colors")}
-            >
-              Log In
-            </Link>
-            <Link 
-              href="/signup" 
-              className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 w-full")}
-            >
-              Join the Club
-            </Link>
+          <div className="hidden md:flex items-center gap-2">
+            {session ? (
+              <div className="flex items-center gap-3">
+                {!isAppRoute && (
+                  <Link 
+                    href="/dashboard" 
+                    className={cn(
+                      buttonVariants({ variant: "ghost" }), 
+                      "hidden lg:flex items-center gap-2 font-bold text-sm hover:bg-primary/5 hover:text-primary transition-all"
+                    )}
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                )}
+                <UserNav />
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login" 
+                  className={cn(buttonVariants({ variant: "ghost" }), "hover:bg-primary/10 transition-colors")}
+                >
+                  Log In
+                </Link>
+                <Link 
+                  href="/signup" 
+                  className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 w-full")}
+                >
+                  Join the Club
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -95,7 +151,7 @@ export function Navbar() {
       >
         <div className="px-4 py-6 space-y-4">
           <nav className="flex flex-col gap-2">
-            {navLinks.map((link) => (
+            {currentLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -107,18 +163,58 @@ export function Navbar() {
             ))}
           </nav>
           <div className="pt-4 border-t border-border/50 flex flex-col gap-3">
-            <Link 
-              href="/login" 
-              className={cn(buttonVariants({ variant: "outline" }), "w-full justify-center h-12 text-base")}
-            >
-              Log In
-            </Link>
-            <Link 
-              href="/signup" 
-              className={cn(buttonVariants({ variant: "default" }), "w-full justify-center rounded-full h-12 text-base shadow-lg shadow-primary/25")}
-            >
-              Join the Club
-            </Link>
+            {session ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 px-4 py-4 bg-muted/40 rounded-2xl border border-border/50">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt={displayName} className="h-full w-full object-cover" />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{displayName}</p>
+                    <p className="text-xs text-muted-foreground font-medium truncate max-w-[180px]">{session.user.email}</p>
+                  </div>
+                </div>
+                <Link 
+                  href="/dashboard" 
+                  className={cn(buttonVariants({ variant: "default" }), "w-full justify-center rounded-xl h-12 text-base")}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
+                <button 
+                  onClick={() => {
+                    handleSignOut()
+                    setMobileMenuOpen(false)
+                  }}
+                  className={cn(buttonVariants({ variant: "outline" }), "w-full justify-center rounded-xl h-12 text-base text-destructive hover:bg-destructive/5")}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login" 
+                  className={cn(buttonVariants({ variant: "outline" }), "w-full justify-center h-12 text-base")}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Log In
+                </Link>
+                <Link 
+                  href="/signup" 
+                  className={cn(buttonVariants({ variant: "default" }), "w-full justify-center rounded-full h-12 text-base shadow-lg shadow-primary/25")}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Join the Club
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
