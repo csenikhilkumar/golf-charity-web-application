@@ -17,15 +17,20 @@ export const metadata: Metadata = {
   description: 'Make an impact while playing the game you love.',
 }
 
+import { Navbar } from '@/components/layout/navbar'
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className={`${fontSans.variable} ${fontHeading.variable} min-h-full font-sans antialiased bg-background text-foreground`}>
-        {children}
+    <html lang="en" className="h-full scroll-smooth">
+      <body className={`${fontSans.variable} ${fontHeading.variable} min-h-full font-sans antialiased bg-background text-foreground flex flex-col`}>
+        <Navbar />
+        <main className="flex-1 pt-24 md:pt-28">
+          {children}
+        </main>
       </body>
     </html>
   )

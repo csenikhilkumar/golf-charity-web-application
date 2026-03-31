@@ -9,7 +9,7 @@ async function main() {
     {
       name: 'The First Tee',
       description: 'Impacting the lives of young people by providing educational programs that build character and instill life-enhancing values through the game of golf.',
-      imageUrl: 'https://images.unsplash.com/photo-1593111774240-d529f12cb416?auto=format&fit=crop&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1535136104956-613d940c6198?auto=format&fit=crop&q=80',
       website: 'https://firsttee.org/',
       featured: true,
     },
@@ -35,6 +35,9 @@ async function main() {
       featured: false,
     }
   ]
+
+  // Clear existing charities to prevent duplicates during re-seeding
+  await prisma.charity.deleteMany()
 
   for (const charity of charities) {
     await prisma.charity.create({
