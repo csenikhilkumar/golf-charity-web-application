@@ -1,62 +1,84 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { 
   Users, 
   Heart, 
   Trophy, 
-  LayoutDashboard, 
-  Settings,
+  LayoutDashboard,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  AlertTriangle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { checkAdminRole } from './actions'
 
 const adminNavItems = [
   { name: 'Overview', href: '/admin', icon: LayoutDashboard },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Charities', href: '/admin/charities', icon: Heart },
   { name: 'Draws', href: '/admin/draws', icon: Trophy },
+  { name: 'Winners', href: '/admin/winners', icon: Trophy },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const pathname = usePathname()
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+  const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading')
+
+  const verifyAdmin = useCallback(async (userId: string) => {
+    const isAdmin = await checkAdminRole(userId)
+    if (isAdmin) {
+      setStatus('authorized')
+    } else {
+      setStatus('denied')
+      router.push('/dashboard')
+    }
+  }, [router])
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/login')
-      } else if (user.user_metadata?.role !== 'ADMIN' && (user as any).role !== 'ADMIN') {
-        // Simple client-side check for now, should ideally be server-side or via custom hook
-        // We'll trust the user metadata or the database record
-        // For security, server components should also check the role
-        setIsAdmin(false)
-        router.push('/dashboard')
-      } else {
-        setIsAdmin(true)
-      }
-    }
-  }, [user, loading, router])
+    if (pathname === '/admin/login') return
+    if (authLoading) return
 
-  if (loading || isAdmin === null) {
+    if (!user) {
+      router.push('/admin/login')
+      return
+    }
+
+    verifyAdmin(user.id)
+  }, [user, authLoading, verifyAdmin, pathname])
+
+  // Skip auth guard for the login page itself to avoid infinite redirect loop
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
+
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center">
-          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground font-medium">Verifying Admin Access...</p>
         </div>
       </div>
     )
   }
 
-  if (isAdmin === false) return null
+  if (status === 'denied') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertTriangle className="h-12 w-12 text-destructive" />
+          <h2 className="text-xl font-bold">Access Denied</h2>
+          <p className="text-muted-foreground">You do not have admin permissions.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/20">
@@ -72,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-1">
           {adminNavItems.map((item) => {
             const isActive = pathname === item.href
             return (

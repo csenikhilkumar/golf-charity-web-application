@@ -19,8 +19,7 @@ import {
   ChevronRight,
   AlertCircle
 } from 'lucide-react'
-import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { WinnerRow } from './winner-row'
 
 export default async function AdminWinnersPage() {
   const winnerRecords = await prisma.winnerRecord.findMany({
@@ -77,56 +76,7 @@ export default async function AdminWinnersPage() {
                 </TableHeader>
                 <TableBody>
                   {winnerRecords.map((winner) => (
-                    <TableRow key={winner.id} className="border-border hover:bg-muted/10 transition-colors">
-                      <TableCell className="py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-inner">
-                            {winner.user.email.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-bold text-foreground leading-none mb-1">{winner.user.name || 'Member'}</p>
-                            <p className="text-[11px] text-muted-foreground font-medium">{winner.user.email}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm">{new Date(0, winner.draw.month - 1).toLocaleString('default', { month: 'long' })} {winner.draw.year}</span>
-                          <span className="text-[10px] text-muted-foreground uppercase font-black">Draw ID: {winner.draw.id.slice(-6)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1.5 mb-1">
-                             <Trophy className="h-3.5 w-3.5 text-amber-500" />
-                             <span className="font-bold text-sm capitalize">{winner.matchType.replace('_', ' ').toLowerCase()} Match</span>
-                          </div>
-                          <span className="font-black text-emerald-600">${winner.prizeAmount.toLocaleString()}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={cn(
-                          "rounded-full text-[10px] font-black uppercase tracking-wider border-none",
-                          winner.status === 'PAID' ? "bg-emerald-500/10 text-emerald-600" :
-                          winner.status === 'PENDING' ? "bg-amber-500/10 text-amber-600" :
-                          winner.status === 'APPROVED' ? "bg-blue-500/10 text-blue-600" :
-                          "bg-rose-500/10 text-rose-600"
-                        )}>
-                          {winner.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="outline" size="sm" className="rounded-xl h-9 border-border bg-background hover:border-primary hover:text-primary transition-all">
-                             Review Proof
-                             <ExternalLink className="ml-2 h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9 hover:bg-muted">
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <WinnerRow key={winner.id} winner={winner} />
                   ))}
                 </TableBody>
               </Table>

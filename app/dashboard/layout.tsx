@@ -1,18 +1,31 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
+import { checkAdminRole } from '@/app/admin/actions'
+
+import { DashboardSidebar } from '@/components/layout/sidebar'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user, loading } = useAuth()
 
+  const checkAndRedirect = useCallback(async () => {
+    if (!user) return
+    const isAdmin = await checkAdminRole(user.id)
+    if (isAdmin) {
+      router.replace('/admin')
+    }
+  }, [user, router])
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login')
+    } else if (!loading && user) {
+      checkAndRedirect()
     }
-  }, [user, loading, router])
+  }, [user, loading, router, checkAndRedirect])
 
   if (loading) {
     return (
@@ -28,8 +41,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return null
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 w-full">
-      {children}
+    <div className="container mx-auto px-4 md:px-8 pt-4 pb-12 mt-20 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row gap-6 lg:gap-8">
+        <DashboardSidebar />
+        <main className="flex-1 min-w-0">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

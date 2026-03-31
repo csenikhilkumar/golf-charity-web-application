@@ -37,10 +37,11 @@ export function Navbar() {
   const imageUrl = dbUser?.imageUrl
   
   const isAppRoute = pathname?.startsWith('/dashboard') || pathname === '/subscribe'
+  const isAdminRoute = pathname?.startsWith('/admin')
   const isCharityFlow = pathname?.startsWith('/charities')
   
-  // If in charity flow, we show no navigation links (How it works, etc)
-  const currentLinks = isCharityFlow ? [] : (isAppRoute ? dashboardLinks : navLinks)
+  // Admin and app routes show no top navigation links on desktop (they are in sidebar)
+  const currentLinks = (isAdminRoute || isCharityFlow || isAppRoute) ? [] : navLinks
 
   useEffect(() => {
     const handleScroll = () => {
@@ -95,18 +96,6 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             {session ? (
               <div className="flex items-center gap-3">
-                {!isAppRoute && (
-                  <Link 
-                    href="/dashboard" 
-                    className={cn(
-                      buttonVariants({ variant: "ghost" }), 
-                      "hidden lg:flex items-center gap-2 font-bold text-sm hover:bg-primary/5 hover:text-primary transition-all"
-                    )}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                )}
                 <UserNav />
               </div>
             ) : (
@@ -175,17 +164,11 @@ export function Navbar() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">{displayName}</p>
-                    <p className="text-xs text-muted-foreground font-medium truncate max-w-[180px]">{session.user.email}</p>
+                    <p className="text-[10px] font-medium text-primary uppercase tracking-wider mt-0.5">
+                      {dbUser?.role === 'ADMIN' ? 'Admin' : 'Premium'}
+                    </p>
                   </div>
                 </div>
-                <Link 
-                  href="/dashboard" 
-                  className={cn(buttonVariants({ variant: "default" }), "w-full justify-center rounded-xl h-12 text-base")}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
-                </Link>
                 <button 
                   onClick={() => {
                     handleSignOut()
