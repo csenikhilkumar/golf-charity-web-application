@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getAdminStats } from './data'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -14,18 +14,7 @@ import {
 import Link from 'next/link'
 
 export default async function AdminDashboardPage() {
-  // Fetch high-level stats
-  const totalUsers = await prisma.user.count()
-  const activeSubs = await prisma.subscription.count({ where: { status: 'ACTIVE' } })
-  const totalCharities = await prisma.charity.count()
-  
-  // Simple aggregate for total raised (placeholder logic)
-  const totalRaisedResult = await prisma.winnerRecord.aggregate({
-    _sum: { prizeAmount: true }
-  })
-  const totalWinnings = totalRaisedResult._sum.prizeAmount || 0
-  // In reality, impact is 40% of revenue. For now we use winnings as a proxy or just show 0.
-  const totalImpact = totalWinnings * 0.25 // Example math
+  const { totalUsers, activeSubs, totalCharities, totalWinnings, totalImpact } = await getAdminStats()
 
   const stats = [
     { name: 'Total Users', value: totalUsers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-600/10' },
@@ -50,6 +39,10 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <Link href="/admin/winners" className="px-6 h-12 rounded-xl bg-muted border border-border font-bold hover:bg-muted/50 transition-all flex items-center justify-center text-foreground">
+            <Trophy className="h-4 w-4 mr-2 text-amber-500" />
+            Claims Inbox
+          </Link>
           <Link href="/admin/draws/new" className="px-6 h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center justify-center">
             Run Monthly Draw
           </Link>
@@ -95,9 +88,15 @@ export default async function AdminDashboardPage() {
                <p className="text-muted-foreground max-w-sm mx-auto mt-2 mb-6">
                  The March 2026 draw has not been initialized yet. Ready to simulate the results?
                </p>
-               <Link href="/admin/draws/new" className="text-primary font-bold hover:underline flex items-center">
-                  Initialize Draw System <ArrowUpRight className="h-4 w-4 ml-1" />
-               </Link>
+               <div className="flex flex-col items-center gap-4">
+                 <Link href="/admin/draws/new" className="text-primary font-bold hover:underline flex items-center">
+                    Initialize Draw System <ArrowUpRight className="h-4 w-4 ml-1" />
+                 </Link>
+                 <div className="h-px w-20 bg-border/50" />
+                 <Link href="/admin/winners" className="text-muted-foreground text-sm font-medium hover:text-primary hover:underline flex items-center">
+                    Review Prize Claims <ArrowUpRight className="h-4 w-4 ml-1" />
+                 </Link>
+               </div>
             </div>
           </CardContent>
         </Card>

@@ -9,7 +9,8 @@ import {
   Target, 
   Settings, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck
 } from 'lucide-react'
 import { useAuth } from '@/components/providers/auth-provider'
 import { useDashboard } from '@/components/providers/dashboard-provider'
@@ -45,12 +46,16 @@ export function UserNav() {
   const displayName = dbUser?.name || user.user_metadata?.name || user.email?.split('@')[0] || 'Member'
   const imageUrl = dbUser?.imageUrl
 
-  const menuItems = [
+  const allMenuItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'My Scores', href: '/dashboard/scores', icon: Target },
     { name: 'Winnings', href: '/dashboard/winnings', icon: Trophy },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ]
+
+  const menuItems = dbUser?.role === 'ADMIN' 
+    ? allMenuItems.filter(item => !['Dashboard', 'My Scores', 'Winnings'].includes(item.name))
+    : allMenuItems
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -70,7 +75,7 @@ export function UserNav() {
             {displayName}
           </span>
           <span className="text-[10px] font-medium text-primary uppercase tracking-wider">
-            Premium
+            {dbUser?.role === 'ADMIN' ? 'Admin' : 'Premium'}
           </span>
         </div>
         <ChevronDown 
@@ -94,6 +99,16 @@ export function UserNav() {
         </div>
 
         <div className="py-2">
+          {dbUser?.role === 'ADMIN' && (
+            <Link
+              href="/admin"
+              className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-primary hover:bg-primary/5 transition-colors border-b border-border/30"
+              onClick={() => setIsOpen(false)}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Admin Console
+            </Link>
+          )}
           {menuItems.map((item) => (
             <Link
               key={item.name}

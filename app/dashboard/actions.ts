@@ -56,17 +56,34 @@ export async function getDashboardData(userId: string, email?: string, name?: st
 
     if (!user) return { error: 'User not found in database' }
 
-    const totalWonAgg = await prisma.winnerRecord.aggregate({
-      where: { userId: user.id },
-      _sum: { prizeAmount: true }
-    })
+    const [totalWonAgg, latestDraw] = await Promise.all([
+      prisma.winnerRecord.aggregate({
+        where: { userId: user.id },
+        _sum: { prizeAmount: true }
+      }),
+      prisma.draw.findFirst({
+        where: { 
+          status: 'PUBLISHED',
+          publishedAt: { lte: new Date() }
+        },
+        orderBy: { publishedAt: 'desc' },
+        include: {
+          winners: {
+            include: { user: { select: { name: true, username: true, email: true } } },
+            take: 10
+          }
+        }
+      })
+    ])
+
     const totalWon = totalWonAgg._sum.prizeAmount || 0
 
     return { 
       user, 
       stats: {
         totalWon,
-        participationCount: user._count.drawEntries
+        participationCount: user._count.drawEntries,
+        latestDraw
       }
     }
   } catch (error: any) {

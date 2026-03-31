@@ -9,7 +9,8 @@ import {
   CheckCircle2, 
   Clock, 
   LayoutList,
-  Eye
+  Eye,
+  ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -96,10 +97,13 @@ export default async function AdminDrawsPage() {
                        ))}
                     </div>
 
-                    <Button variant="outline" className="rounded-xl h-10 border-border hover:border-primary hover:text-primary">
+                    <Link 
+                      href={`/admin/draws/${draw.id}`}
+                      className="inline-flex items-center justify-center rounded-xl h-10 px-4 border border-border text-sm font-medium hover:border-primary hover:text-primary transition-all"
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       View
-                    </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

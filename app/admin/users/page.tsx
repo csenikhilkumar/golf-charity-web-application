@@ -20,7 +20,8 @@ export default async function AdminUsersPage() {
         select: { scores: true }
       }
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    take: 50
   })
 
   return (

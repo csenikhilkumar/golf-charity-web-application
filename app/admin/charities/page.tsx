@@ -12,7 +12,8 @@ export default async function AdminCharitiesPage() {
         select: { subscribers: true }
       }
     },
-    orderBy: { name: 'asc' }
+    orderBy: { name: 'asc' },
+    take: 50
   })
 
   return (

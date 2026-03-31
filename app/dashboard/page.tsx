@@ -190,12 +190,77 @@ export default function DashboardPage() {
       </div>
 
       {/* Additional Stats Row */}
-      <div className="flex items-center justify-between mt-10 mb-4 px-1">
-        <h2 className="text-xl font-bold font-heading">Trophy Room</h2>
-        <div className="text-sm text-emerald-600 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-          Total Won: ${stats.totalWon.toFixed(2)}
+      <div className="grid lg:grid-cols-2 gap-8 mt-10">
+        <div>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-xl font-bold font-heading">Recent Winners</h2>
+            {stats.latestDraw && (
+              <Badge variant="outline" className="text-[10px] font-bold uppercase py-1 border-primary/20 bg-primary/5 text-primary">
+                {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][stats.latestDraw.month - 1]} {stats.latestDraw.year}
+              </Badge>
+            )}
+          </div>
+          <Card className="rounded-3xl border-border shadow-sm overflow-hidden h-fit">
+            <CardContent className="p-0">
+              {stats.latestDraw ? (
+                <div className="divide-y divide-border">
+                  <div className="p-6 bg-muted/20">
+                     <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Winning Numbers</p>
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">${stats.latestDraw.prizePool.toLocaleString()} Pool</p>
+                     </div>
+                     <div className="flex gap-2">
+                        {stats.latestDraw.numbers.map((num: number) => (
+                          <div key={num} className="h-9 w-9 rounded-full bg-white border border-border flex items-center justify-center text-sm font-bold shadow-sm">
+                            {num}
+                          </div>
+                        ))}
+                     </div>
+                  </div>
+                  {stats.latestDraw.winners.length > 0 ? (
+                    <div className="divide-y divide-border">
+                      {stats.latestDraw.winners.map((win: any, i: number) => (
+                        <div key={i} className="p-4 px-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shadow-inner">
+                              {win.user?.name ? win.user.name.charAt(0).toUpperCase() : (win.user?.email ? win.user.email.charAt(0).toUpperCase() : 'G')}
+                            </div>
+                            <div>
+                               <p className="text-sm font-bold text-foreground">
+                                 {win.user?.name || win.user?.username || (win.user?.email ? win.user.email.split('@')[0] : 'Member')}
+                               </p>
+                               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">{win.matchType.replace('_', ' ').toLowerCase()} match</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="font-bold text-emerald-600">+${win.prizeAmount.toFixed(0)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-10 text-center text-muted-foreground italic text-sm">
+                      No winners found for this draw.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-10 text-center bg-muted/20">
+                   <Trophy className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                   <p className="text-sm text-muted-foreground font-medium">No recent draw data available.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-xl font-bold font-heading">Trophy Room</h2>
+            <div className="text-sm text-emerald-600 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Total Won: ${stats.totalWon.toFixed(2)}
+            </div>
+          </div>
       <Card className="rounded-3xl border-border shadow-sm">
         <CardContent className="p-0">
           {user.winnings && user.winnings.length > 0 ? (
@@ -235,6 +300,8 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
       
+        </div>
+      </div>
     </div>
   )
 }
