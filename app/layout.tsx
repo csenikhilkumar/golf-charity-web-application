@@ -28,6 +28,8 @@ import { Toaster } from 'sonner'
 import Script from 'next/script'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 
+import { Footer } from '@/components/layout/footer'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -65,9 +67,10 @@ export default function RootLayout({
             <DashboardProvider>
               <Navbar />
               <Toaster position="top-center" richColors />
-              <main className="flex-1 pt-24 md:pt-28">
+              <main className="flex-1 pt-24 md:pt-28 flex flex-col">
                 {children}
               </main>
+              <Footer />
             </DashboardProvider>
           </AuthProvider>
         </ThemeProvider>
