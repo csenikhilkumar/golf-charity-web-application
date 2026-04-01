@@ -192,7 +192,11 @@ export function Navbar() {
           <div className="pt-4 border-t border-border/50 flex flex-col gap-3">
             {session ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 px-4 py-4 bg-muted/40 rounded-2xl border border-border/50">
+                <Link 
+                  href="/dashboard/settings" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-4 bg-muted/40 rounded-2xl border border-border/50 hover:bg-muted/60 transition-colors"
+                >
                   <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
                     {imageUrl ? (
                       <img src={imageUrl} alt={displayName} className="h-full w-full object-cover" />
@@ -206,7 +210,7 @@ export function Navbar() {
                       {dbUser?.role === 'ADMIN' ? 'Admin' : (dbUser?.subscription?.status === 'ACTIVE' ? 'Premium' : 'Member')}
                     </p>
                   </div>
-                </div>
+                </Link>
                 {dbUser?.role === 'ADMIN' ? (
                   !isAdminRoute && (
                     <Link 
