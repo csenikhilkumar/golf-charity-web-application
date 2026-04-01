@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
 
 /**
@@ -10,13 +9,12 @@ import { useAuth } from '@/components/providers/auth-provider'
  */
 export function AuthRedirect() {
   const { user, loading } = useAuth()
-  const router = useRouter()
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
     }
-  }, [user, loading, router])
+  }, [user, loading])
 
   return null
 }
